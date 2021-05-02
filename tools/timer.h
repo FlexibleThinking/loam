@@ -1,3 +1,5 @@
+#ifndef TIMER_H
+#define TIMER_H
 #include <time.h>
 #include <string>
 
@@ -39,3 +41,4 @@ public:
     void result();
     void result(const char* name);
 };
+#endif //TIMER_H
