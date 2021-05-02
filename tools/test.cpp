@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "timer.h"
+#include "timer.cpp"
 #include <string>
 #include <iostream>
 

@@ -34,14 +34,8 @@ private:
     clock_t startTime, endTime;
     double time;
 public:
-    void start(){startTime = clock();}
-    void end(){endTime = clock();}
-    void result(){
-        time = (double)(endTime - startTime);
-        printf("unknown function : %.3f s, %.3f ms\n", time / CLOCKS_PER_SEC, time);
-    }
-    void result(const char* name){
-        time = (double)(endTime - startTime);
-        printf("%s : %.3f s, %.3f ms\n", name, time / CLOCKS_PER_SEC, time);
-    }
+    void start();
+    void end();
+    void result();
+    void result(const char* name);
 };
