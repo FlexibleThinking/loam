@@ -37,7 +37,7 @@
 #include <iostream>
 #include <map>
 #include "boost/assign.hpp"
-
+#include "loam_velodyne/Timer.h"
 #include <pcl_conversions/pcl_conversions.h>
 
 
@@ -171,8 +171,10 @@ void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2Con
 
 
 void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime)
-{
-  std::cout<<"Process() start"<<std::endl;
+{	
+ Timer t;
+ t.start();
+
   size_t cloudSize = laserCloudIn.size();
 
   // determine scan start and end orientations
@@ -237,6 +239,10 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
         ori -= 2 * M_PI;
       }
     }
+
+	//profiling end
+	t.end();
+	t.result("MultiScanRegistration -> process()");
 
     // calculate relative scan time based on point orientation
     float relTime = config().scanPeriod * (ori - startOri) / (endOri - startOri);

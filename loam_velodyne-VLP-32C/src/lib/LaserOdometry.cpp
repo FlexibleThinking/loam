@@ -31,7 +31,7 @@
 //     Robotics: Science and Systems Conference (RSS). Berkeley, CA, July 2014.
 
 #include <pcl/filters/filter.h>
-
+#include "loam_velodyne/Timer.h"
 #include "loam_velodyne/LaserOdometry.h"
 #include "loam_velodyne/common.h"
 #include "math_utils.h"
@@ -289,7 +289,11 @@ namespace loam
       return;// waiting for new data to arrive...
 
     reset();// reset flags, etc.
+//	Timer t;
+//	t.start();
     BasicLaserOdometry::process();
+//	t.end();
+//	t.result("BasicLaserOdometry -> process() ");
     publishResult();
   }
 
