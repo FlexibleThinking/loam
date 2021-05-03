@@ -37,6 +37,8 @@ private:
     clock_t startTime, endTime;
     double time;
 public:
+    explicit Timer();
+    ~Timer();
     void start();
     void end();
     void result();
