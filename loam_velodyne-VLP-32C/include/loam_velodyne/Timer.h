@@ -34,15 +34,22 @@ public:
 namespace loam{
 class Timer{
 private:
-    clock_t startTime, endTime;
-    double time;
+    clock_t start_time_, end_time_;
+    double time_;
+	int call_time_;
+	double time_total_;
+	int call_time_threshold_;
 public:
     explicit Timer();
     ~Timer();
-    void start();
-    void end();
-    void result();
-    void result(const char* name);
+    void Start();
+    void End();
+    void Result();
+    void Result(const char* name);
+	void ResultBySec(const char* name);
+	void ResultByCallTime(const char* name);
+	int GetCallTime();
+	void ResetCallTime();
 };
 }
 #endif //TIMER_H
