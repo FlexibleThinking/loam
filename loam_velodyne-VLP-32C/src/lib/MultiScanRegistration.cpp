@@ -81,7 +81,7 @@ int MultiScanMapper::getRingForAngle(const float& angle) {
 
 
 MultiScanRegistration::MultiScanRegistration(const MultiScanMapper& scanMapper)
-    : _scanMapper(scanMapper)
+    : _scanMapper(scanMapper), _t()
 {};
 
 
@@ -172,8 +172,7 @@ void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2Con
 
 void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime)
 {	
- Timer t;
- t.start();
+ _t.Start();
 
   size_t cloudSize = laserCloudIn.size();
 
@@ -241,8 +240,9 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
     }
 
 	//profiling end
-	t.end();
-	t.result("MultiScanRegistration -> process()");
+	_t.End();
+	_t.ResultByCallTime("MultiScanRegistration -> process()");
+	//delete(t);
 
     // calculate relative scan time based on point orientation
     float relTime = config().scanPeriod * (ori - startOri) / (endOri - startOri);

@@ -37,6 +37,7 @@
 #include "loam_velodyne/ScanRegistration.h"
 
 #include <sensor_msgs/PointCloud2.h>
+#include "loam_velodyne/Timer.h"
 
 
 namespace loam {
@@ -144,7 +145,7 @@ private:
   MultiScanMapper _scanMapper;  ///< mapper for mapping vertical point angles to scan ring IDs
   std::vector<pcl::PointCloud<pcl::PointXYZI> > _laserCloudScans;
   ros::Subscriber _subLaserCloud;   ///< input cloud message subscriber
-
+  Timer _t;
 };
 
 } // end namespace loam
