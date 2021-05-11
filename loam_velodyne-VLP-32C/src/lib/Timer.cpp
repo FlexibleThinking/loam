@@ -39,8 +39,8 @@ namespace loam{
 		if(call_time_%call_time_threshold_==0){
 			//printf("%d :: call_time_, %0.3f :: time_total\n",call_time_, time_total_);
 			printf("=========ResultByCallTime=========\n");
-			printf("%s : %.3f s, %.3f ms per %d calls\n", name, time_total_/ 1000000, time_total_, call_time_threshold_);
-			printf("%.3f s, %.3f ms per 1 calls\n\n\n", (time_total_/call_time_threshold_)/1000000, time_total_/call_time_threshold_);
+			this.Result(name);
+			printf("%.3f s, %.3f ms per 1 calls\n\n\n", (time_total_/call_time_threshold_)/CLOCKS_PER_SEC, time_total_/call_time_threshold_);
 		time_total_ = 0;
 		}
 	}
