@@ -1825,7 +1825,8 @@ public:
         dataset(inputData), index_params(params), distance(inputData)
     {
         if (dataset.kdtree_get_point_count()) throw std::runtime_error("[nanoflann] cannot handle non empty point cloud.");
-        treeCount = log2(maximumPointCount);
+        // overload error occur. log2(float) vs log2(double)
+		treeCount = log2((double)maximumPointCount);
         pointCount = 0U;
         dim = dimensionality;
         treeIndex.clear();
