@@ -39,7 +39,8 @@ catkin_package(
 #set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_NVCC_FLAGS "-v" CACHE STRING "nvcc flags" FORCE)
+set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 #CUDA_ADD_LIBRARY(mylib SHARED
 #	src/laser_mapping_node.cpp
 #	src/lib/CudaTest.cu
