@@ -35,7 +35,7 @@
 #include "Twist.h"
 #include "CircularBuffer.h"
 #include "time_utils.h"
-
+#include "BasicLaserMappingKernel.cuh"
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
@@ -181,6 +181,10 @@ private:
    pcl::VoxelGrid<pcl::PointXYZI> _downSizeFilterMap;      ///< voxel filter for down sizing accumulated map
 
    bool _downsizedMapCreated = false;
+
+   // For Cuda var && functions
+
+   CudaTest _cuda;
 };
 
 } // end namespace loam
