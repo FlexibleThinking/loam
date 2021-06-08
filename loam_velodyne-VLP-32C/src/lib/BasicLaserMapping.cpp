@@ -34,7 +34,7 @@
 #include "loam_velodyne/BasicLaserMapping.h"
 #include "loam_velodyne/nanoflann_pcl.h"
 #include "math_utils.h"
-#include "loam_velodyne/BasicLaserMappingKernel.cuh"
+//#include "loam_velodyne/BasicLaserMappingKernel.cuh"
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/QR>
@@ -271,16 +271,7 @@ bool BasicLaserMapping::createDownsizedMap()
 
 bool BasicLaserMapping::process(Time const& laserOdometryTime)
 {
-	int a = 3, b = 4, c = 0, cu = 0;
-	c = sum_int(a, b);
-	CudaTest gpuacc;
-	gpuacc.sum_cuda(a, b, &cu);
-
-	printf("CPU Result : %d\n",c);
-	printf("GPU Result : %d\n",cu);
-
 //printf("start\n");
-clock_t start = clock();
    // skip some frames?!?
    _frameCount++;
    if (_frameCount < _stackFrameNum)
@@ -291,11 +282,9 @@ clock_t start = clock();
    _laserOdometryTime = laserOdometryTime;
 
    pcl::PointXYZI pointSel;
-clock_t temp = clock();
+
    // relate incoming data to map
    transformAssociateToMap();
-//printf("transformAssociateToMap : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    for (auto const& pt : _laserCloudCornerLast->points)
    {
       pointAssociateToMap(pt, pointSel);
@@ -307,14 +296,13 @@ temp = clock();
       pointAssociateToMap(pt, pointSel);
       _laserCloudSurfStack->push_back(pointSel);
    }
-//printf("fors : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    pcl::PointXYZI pointOnYAxis;
    pointOnYAxis.x = 0.0;
    pointOnYAxis.y = 10.0;
    pointOnYAxis.z = 0.0;
    pointAssociateToMap(pointOnYAxis, pointOnYAxis);
-//printf("second pointAssociate : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
+
 
    auto const CUBE_SIZE = 50.0;
    auto const CUBE_HALF = CUBE_SIZE / 2;
@@ -326,7 +314,7 @@ temp = clock();
    if (_transformTobeMapped.pos.x() + CUBE_HALF < 0) centerCubeI--;
    if (_transformTobeMapped.pos.y() + CUBE_HALF < 0) centerCubeJ--;
    if (_transformTobeMapped.pos.z() + CUBE_HALF < 0) centerCubeK--;
-temp = clock();
+
    while (centerCubeI < 3)
    {
       for (int j = 0; j < _laserCloudHeight; j++)
@@ -348,8 +336,6 @@ temp = clock();
       centerCubeI++;
       _laserCloudCenWidth++;
    }
-//printf("while 1 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    while (centerCubeI >= _laserCloudWidth - 3)
    {
       for (int j = 0; j < _laserCloudHeight; j++)
@@ -371,8 +357,7 @@ temp = clock();
       centerCubeI--;
       _laserCloudCenWidth--;
    }
-//printf("while 2 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    while (centerCubeJ < 3)
    {
       for (int i = 0; i < _laserCloudWidth; i++)
@@ -394,8 +379,7 @@ temp = clock();
       centerCubeJ++;
       _laserCloudCenHeight++;
    }
-//printf("while 3 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    while (centerCubeJ >= _laserCloudHeight - 3)
    {
       for (int i = 0; i < _laserCloudWidth; i++)
@@ -417,8 +401,7 @@ temp = clock();
       centerCubeJ--;
       _laserCloudCenHeight--;
    }
-//printf("while 4 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    while (centerCubeK < 3)
    {
       for (int i = 0; i < _laserCloudWidth; i++)
@@ -440,8 +423,7 @@ temp = clock();
       centerCubeK++;
       _laserCloudCenDepth++;
    }
-//printf("while 5 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    while (centerCubeK >= _laserCloudDepth - 3)
    {
       for (int i = 0; i < _laserCloudWidth; i++)
@@ -463,8 +445,6 @@ temp = clock();
       centerCubeK--;
       _laserCloudCenDepth--;
    }
-//printf("while 6 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    _laserCloudValidInd.clear();
    _laserCloudSurroundInd.clear();
    for (int i = centerCubeI - 2; i <= centerCubeI + 2; i++)
@@ -523,8 +503,6 @@ temp = clock();
          }
       }
    }
-//printf("for 1 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    // prepare valid map corner and surface cloud for pose optimization
    _laserCloudCornerFromMap->clear();
    _laserCloudSurfFromMap->clear();
@@ -533,56 +511,36 @@ temp = clock();
       *_laserCloudCornerFromMap += *_laserCloudCornerArray[ind];
       *_laserCloudSurfFromMap += *_laserCloudSurfArray[ind];
    }
-//printf("for 2 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    // prepare feature stack clouds for pose optimization
    for (auto& pt : *_laserCloudCornerStack)
       pointAssociateTobeMapped(pt, pt);
-//printf("for 3 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
    for (auto& pt : *_laserCloudSurfStack)
       pointAssociateTobeMapped(pt, pt);
-//printf("for 4 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    // down sample feature stack clouds
    std::cout<<"asdf"<<std::endl;
-   temp = clock();
+
    _laserCloudCornerStackDS->clear();
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
    
-   temp = clock();
    _downSizeFilterCorner.setInputCloud(_laserCloudCornerStack); 
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
-   
-   temp = clock();
+
    _downSizeFilterCorner.filter(*_laserCloudCornerStackDS);
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
+
    size_t laserCloudCornerStackNum = _laserCloudCornerStackDS->size();
 
-   temp = clock();
+;
    _laserCloudSurfStackDS->clear();
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
-   
-   temp = clock();
    _downSizeFilterSurf.setInputCloud(_laserCloudSurfStack);
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
-   
-   temp = clock();
    _downSizeFilterSurf.filter(*_laserCloudSurfStackDS);
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
+
    size_t laserCloudSurfStackNum = _laserCloudSurfStackDS->size();
 
-   temp = clock();
    _laserCloudCornerStack->clear();
    _laserCloudSurfStack->clear();
 
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
    // run pose optimization
-   temp = clock();
    optimizeTransformTobeMapped();
-   std::cout<<(double)(clock()-temp)/CLOCKS_PER_SEC<<"\n"<<std::endl;
-printf("something : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    // store down sized corner stack points in corresponding cube clouds
    for (int i = 0; i < laserCloudCornerStackNum; i++)
    {
@@ -604,8 +562,7 @@ temp = clock();
          _laserCloudCornerArray[cubeInd]->push_back(pointSel);
       }
    }
-//printf("for 5 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    // store down sized surface stack points in corresponding cube clouds
    for (int i = 0; i < laserCloudSurfStackNum; i++)
    {
@@ -627,8 +584,7 @@ temp = clock();
          _laserCloudSurfArray[cubeInd]->push_back(pointSel);
       }
    }
-//printf("for 6 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    // down size all valid (within field of view) feature cube clouds
    for (auto const& ind : _laserCloudValidInd)
    {
@@ -644,12 +600,10 @@ temp = clock();
       _laserCloudCornerArray[ind].swap(_laserCloudCornerDSArray[ind]);
       _laserCloudSurfArray[ind].swap(_laserCloudSurfDSArray[ind]);
    }
-//printf("for 7 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-temp = clock();
+
    transformFullResToMap();
    _downsizedMapCreated = createDownsizedMap();
-//printf("something 2 : %lf\n", (double)(clock()-temp)/CLOCKS_PER_SEC);
-//printf("total : %lf\n", (double)(clock()-start)/CLOCKS_PER_SEC);
+
    return true;
 }
 
@@ -688,9 +642,10 @@ void BasicLaserMapping::optimizeTransformTobeMapped()
    std::vector<int> pointSearchInd(5, 0);
    std::vector<float> pointSearchSqDis(5, 0);
 
+   // kdtree는 200byte로 고정됨. 
    kdtreeCornerFromMap.setInputCloud(_laserCloudCornerFromMap);
    kdtreeSurfFromMap.setInputCloud(_laserCloudSurfFromMap);
-
+   
    Eigen::Matrix<float, 5, 3> matA0;
    Eigen::Matrix<float, 5, 1> matB0;
    Eigen::Vector3f matX0;
@@ -708,10 +663,24 @@ void BasicLaserMapping::optimizeTransformTobeMapped()
 
    bool isDegenerate = false;
    Eigen::Matrix<float, 6, 6> matP;
+   
 
    size_t laserCloudCornerStackNum = _laserCloudCornerStackDS->size();
    size_t laserCloudSurfStackNum = _laserCloudSurfStackDS->size();
 
+   /*******************************GPU*******************************/
+
+   /*GPU에서 사용해야 할 변수를 kernel.cu로 복사*/
+   _cuda.set_laser_cloud_corner_from_map(_laserCloudCornerFromMap);
+   _cuda.set_laser_cloud_surf_from_map(_laserCloudSurfFromMap);
+   _cuda.set_corner_stack_down_size(_laserCloudCornerStackDS);
+   _cuda.set_surf_stack_down_size(_laserCloudSurfStackDS);
+   _cuda.set_max_iter(_maxIterations);
+
+   _cuda.initialize();
+
+   _cuda.process();
+   /*******************************GPU*******************************/
    for (size_t iterCount = 0; iterCount < _maxIterations; iterCount++)
    {
       _laserCloudOri.clear();
